@@ -24,7 +24,8 @@ import time
 class Screen:
     def __init__(self):
         self.universe = None
-        self.fps = 35           # fps of the universe
+        self.fps = 35                   # fps of the universe
+        self.resolution = (500,500)
     pass
 
 # Universe object contains real distances, particles, an dictates
@@ -33,26 +34,39 @@ class Universe:
     def __init__(self):
         self.size = (500000, 500000)    # m
         self.G = 6.674 * 10**(-11)      # N*(m/kg)**2
-        self.timestep = 0.1             # update rate
-        self.rate = 1                  # speed of time
+        self.simfrequency = 10          # update rate
+        self.rate = 1                   # speed of time
         self.simtime = 0
+        self.is_running = False
         
         self.particles = []             # list of particles
     
-    def update(self):
-        # <TODO>
-        # Create updating function for the universe
-        timepassed = self.timestep * self.rate
-        
-        
+        self.update_values()    
+    
+    def update_values(self):
+        self.realtimestep = 1 / (self.simfrequency * self.rate)
+        self.simtimestep = 1 / self.simfrequency
+    
+    def start(self):
+        self.is_running = True
+        self.update_universe()
+            
+    def stop(self):
+        self.is_running = False
+    
+    def update_universe(self):
         # forces should be calculated at the start of the timestep
         self.interact()
         # physics should be calculated at the end of the timestep
         self.physics()
+        # Pausing sim for time
+        time.sleep(self.realtimestep)
+        # Updating Time passed in universe
+        self.simtime += self.simtimestep
         
-        
-        time.sleep(timepassed)
-        self.simtime += timepassed
+        if self.run is True:
+            self.update_universe()
+            
         
         
         
@@ -76,13 +90,21 @@ class Universe:
         m1, m2 = p1.mass, p2.mass
         r = self.get_dist(p1, p2)
         F = self.G * (m1 * m2) / r**2   # Newtons law of gravity
-        p1.apply_force(F, direction)
+        vector = self.get_vector(p1, p2)
+        p1.apply_force(F, vector)
         
     
     def get_dist(self, particle1, particle2):
         p1, p2 = particle1, particle2
         dist = np.sqrt(np.sum(np.square(p1.pos - p2.pos)))
         return dist
+    
+    def get_vector(self, particle1, particle2):
+        vector = particle2 - particle1
+        dist = self.get_dist(particle1, particle2)
+        scale = 1/dist
+        vector = vector * scale
+        return vector
 
     def physics(self):
         """
@@ -108,10 +130,9 @@ class Particle:
         self.vel = None
         self.acc = None
         
-    def apply_force(self, F):
-        
-        
-
+    def apply_force(self, F, vector):
+        add_acc = F * vector / self.mass
+        self.acc =  self.acc + add_acc
         
         
 # vector object are an experiment with the intent of making the
