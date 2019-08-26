@@ -25,8 +25,16 @@ class Screen:
     def __init__(self):
         self.universe = None
         self.fps = 35                   # fps of the universe
-        self.resolution = (500,500)
-    pass
+        self.rez = 500
+        self.d = 3
+        self.display = self.make_screen
+    
+    def make_screen(self):
+        np.full((self.rez,self.rez, self.d),255, dtype='uint8')
+        
+        
+    def display(self):
+        cv.imshow("Universe", self.display)
 
 # Universe object contains real distances, particles, an dictates
 # the rate of time within our system.
@@ -110,6 +118,13 @@ class Universe:
         """
         Updates velocity and position of particles  
         """
+        for p in self.particles:
+            t = self.simtimestep
+            # Accuracy can be improved by using the average values
+            # between accel and vel to calc pos. i think.
+            p.pos = p.pos + p.vel * t + (1/2) * p.acc * t**2    # eqn of motion
+            p.vel = p.acc * t + p.vel                           # eqn of motion
+        
     def spawn_particle(self, mass=0, pos=[0,0,0], 
                                      vel=[0,0,0],
                                      acc=[0,0,0]):
@@ -146,3 +161,9 @@ class Vector:
     def vector_sum(self):
         pass
         
+if __name__=="__main__":
+    
+    universe = Universe()
+    screen = Screen
+    screen.universe = universe
+    
