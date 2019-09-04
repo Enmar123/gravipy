@@ -115,8 +115,17 @@ class Screen:
     
     def draw_pts(self, pts):
         for pt in pts:
-            self.img[pt[0]%self.size,pt[1]%self.size] = [255,255,255]
-            
+            self.img[pt[0]%self.size,pt[1]%self.size] = [255,255,255] # draw points
+            cv.circle("Screen",(pt[0]%self.size, pt[1]%self.size), [255,255,255] )
+    
+    def draw_circles(self, ps):
+        for p in ps:
+            r = int(round((p.get_mass()**(1/2))))
+            x, y = p.get_pos()
+            x = int(round(x))
+            y = int(round(y))
+            cv.circle(screen.img,(x%self.size, y%self.size), r, [255,255,255] )
+    
     def clear(self):
         self.img = np.zeros((self.size,self.size,3), np.uint8)
         
@@ -124,26 +133,22 @@ class Screen:
 if __name__=="__main__":
     screen = Screen(500)
     uni = Universe()
-    #point1 = Point([255,255],[1,0],[0.5,0])
-    #point2 = Point([255,300],[1,1],[0.1,0])
-    #particle1 = Particle([255,255],[0,0.3],[0,0],20)
-    #particle2 = Particle([200,255],[0,-.3],[0,0],20)
+    # Testing particles
+    particle1 = Particle([255,255],[0,0.3],[0,0],20)   # @500 "fps"
+    particle2 = Particle([200,255],[0,-.3],[0,0],20)   # @500
     #particle1 = Particle([255,255],[0,-.15],[0,0],100) # @500
-    #particle2 = Particle([200,255],[0,1.5],[0,0],10)   # @
-    particle1 = Particle([255,255],[-1,0],[0,0],100) # @500
-    particle2 = Particle([200,255],[0,3],[0,0],10)   # @500
+    #particle2 = Particle([200,255],[0,1.5],[0,0],10)   # @500
+    #particle1 = Particle([255,255],[-1,0],[0,0],100)    # @500
+    #particle2 = Particle([200,255],[0,3],[0,0],10)      # @500
     uni.add_prt([particle1, particle2])
     
     
-    for i in range(2000):
+    for i in range(10000): # Duaration of playback 
         screen.clear()
 
         uni.update()
-        #point1.update(1)
-        #point2.update(1)
-        #points = [point1, point2]
-        pts = screen.project(uni.particles)
-        screen.draw_pts(pts)
+        #pts = screen.project(uni.particles)
+        screen.draw_circles(uni.particles)
         
         cv.imshow("Screen", screen.img)
         if cv.waitKey(int(1000/500)) == ord('q'): # Press q to stop sim
